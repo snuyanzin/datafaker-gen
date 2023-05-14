@@ -1,0 +1,14 @@
+.DS_Store
+target
+.project
+.classpath
+.settings
+.idea/*
+!.idea/vcs.xml
+!.idea/icon.png
+*.iml
+/dependency-reduced-pom.xml
+META-INF/
+bin/
+site
+.mvn/wrapper/maven-wrapper.jar
