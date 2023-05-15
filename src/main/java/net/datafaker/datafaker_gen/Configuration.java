@@ -6,7 +6,6 @@ public class Configuration {
     private final String format;
     private final String outputConf;
 
-    // null means take from output config
     private final String sink;
 
     private Configuration(int numberOfLines, String schema, String format, String outputConf, String sink) {

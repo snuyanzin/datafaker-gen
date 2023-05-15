@@ -3,10 +3,10 @@ package net.datafaker.datafaker_gen;
 import net.datafaker.Faker;
 import net.datafaker.datafaker_gen.formats.Format;
 import net.datafaker.datafaker_gen.sink.Sink;
+import net.datafaker.shaded.snakeyaml.Yaml;
 import net.datafaker.transformations.Field;
 import net.datafaker.transformations.Schema;
 import net.datafaker.transformations.Transformer;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
