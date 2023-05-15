@@ -71,9 +71,10 @@ public class DatafakerGen {
         Sink sink = name2sink.get(sinkName);
         Objects.requireNonNull(sink,
                 "Sink '" + conf.getSink() + "' is not available. The list of available sinks: " + name2sink.keySet());
+        final Schema schema = Schema.of(fields.toArray(new Field[0]));
         sink.run(sinkConf,
                 n -> findTransformerByName(conf.getFormat(), name2Transformer)
-                        .generate(Schema.of(fields.toArray(new Field[0])), n), conf.getNumberOfLines());
+                        .generate(schema, n), conf.getNumberOfLines());
     }
 
 

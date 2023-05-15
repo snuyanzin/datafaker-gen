@@ -36,11 +36,17 @@ public class FieldFactory {
         switch (type) {
             case ARRAY:
                 Object minLengthObj = object.get("minLength");
-                int minLength = minLengthObj instanceof Number ? (Integer) minLengthObj : Integer.parseInt(String.valueOf(minLengthObj));
+                int minLength = minLengthObj instanceof Number
+                        ? ((Number) minLengthObj).intValue()
+                        : Integer.parseInt(String.valueOf(minLengthObj));
                 Object maxLengthObj = object.get("maxLength");
-                int maxLength = maxLengthObj instanceof Number ? (Integer) maxLengthObj :Integer.parseInt(String.valueOf(maxLengthObj));
+                int maxLength = maxLengthObj instanceof Number
+                        ? ((Number) maxLengthObj).intValue()
+                        : Integer.parseInt(String.valueOf(maxLengthObj));
                 return (T) field(name,
-                        applyNullRate(faker, nullRate, () -> ((List)faker.collection(generators.toArray(new Supplier[0])).len(minLength, maxLength).build().get()).stream().toArray()));
+                        applyNullRate(faker, nullRate,
+                                () -> ((List) faker.collection((List) generators)
+                                        .len(minLength, maxLength).build().get()).stream().toArray()));
             case STRUCT:
                 List<Field> fields = new ArrayList<>();
                 List<Map<String, Object>> list = (List<Map<String, Object>>) object.get("fields");
