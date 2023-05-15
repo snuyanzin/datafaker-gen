@@ -114,9 +114,8 @@ public class DatafakerGen {
             return format2Transformer.get(formatNameUpper);
         }
 
-        System.err.print("'" + formatName + "'" + " is not supported yet. Available formats: ");
-        System.err.println("[" + String.join(", ", format2Transformer.keySet()) + "]");
-        System.exit(1);
-        return null;
+        var errorMessage = "'" + formatName + "'" + " is not supported yet. Available formats: ["
+                + String.join(", ", format2Transformer.keySet()) + "]";
+        throw new IllegalArgumentException(errorMessage);
     }
 }
