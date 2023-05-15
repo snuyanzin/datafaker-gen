@@ -2,6 +2,7 @@ package net.datafaker.datafaker_gen.formats;
 
 import net.datafaker.transformations.sql.SqlTransformer;
 
+import java.util.Locale;
 import java.util.Map;
 
 public class SqlFormat implements Format<CharSequence> {
@@ -17,17 +18,17 @@ public class SqlFormat implements Format<CharSequence> {
             return (SqlTransformer<IN>) builder.build();
         }
         for (Map.Entry<String, String> entry : config.entrySet()) {
-            switch (entry.getKey()) {
-                case "tableName":
+            switch (entry.getKey().toLowerCase(Locale.ROOT)) {
+                case "tablename":
                     builder.tableName(entry.getValue());
                     break;
                 case "quote":
                     builder.quote(entry.getValue().charAt(0));
                     break;
-                case "schemaName":
+                case "schemaname":
                     builder.schemaName(entry.getValue());
                     break;
-                case "sqlIdentifierQuote":
+                case "sqlidentifierquote":
                     builder.sqlQuoteIdentifier(entry.getValue());
                     break;
                 case "batch":

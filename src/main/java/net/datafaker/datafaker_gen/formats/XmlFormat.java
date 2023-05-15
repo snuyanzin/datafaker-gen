@@ -2,6 +2,7 @@ package net.datafaker.datafaker_gen.formats;
 
 import net.datafaker.transformations.XmlTransformer;
 
+import java.util.Locale;
 import java.util.Map;
 
 public class XmlFormat implements Format<CharSequence> {
@@ -17,7 +18,7 @@ public class XmlFormat implements Format<CharSequence> {
             return (XmlTransformer<IN>) builder.build();
         }
         for (Map.Entry<String, String> entry : config.entrySet()) {
-            switch (entry.getKey()) {
+            switch (entry.getKey().toLowerCase(Locale.ROOT)) {
                 case "pretty":
                     final Object isPretty = entry.getValue();
                     if (isPretty instanceof Boolean) {
