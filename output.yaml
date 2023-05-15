@@ -11,3 +11,4 @@ formats:
     separator: $$$$$$$
   json:
     formattedAs: ""
+  yaml:
