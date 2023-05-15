@@ -26,10 +26,11 @@ public class FieldFactory {
         return FieldFactoryHolder.INSTANCE;
     }
 
-    public <T> T get(Faker faker, Map<String, Object> object) {
+    public <T> T get(Faker faker, Map<String, Object> object, Locale defaultLocale) {
         final FieldType type = FieldType.validateRequiredFieldsAndGet(object);
         final String name = (String) object.get("name");
-        final List<Supplier<?>> generators = getGenerators(faker, (List<String>) object.get("generators"));
+        final Locale fieldLocale = parseLocale((String) object.get("locale"), defaultLocale);
+        final List<Supplier<?>> generators = getGenerators(faker, (List<String>) object.get("generators"), fieldLocale, defaultLocale);
         final Object nullRateObj = object.get("nullRate");
         final double nullRate = parseNullRate(nullRateObj);
 
@@ -43,15 +44,26 @@ public class FieldFactory {
                 int maxLength = maxLengthObj instanceof Number
                         ? ((Number) maxLengthObj).intValue()
                         : Integer.parseInt(String.valueOf(maxLengthObj));
+
                 return (T) field(name,
                         applyNullRate(faker, nullRate,
-                                () -> ((List) faker.collection((List) generators)
-                                        .len(minLength, maxLength).build().get()).stream().toArray()));
+                                () -> {
+                                    if (fieldLocale.equals(defaultLocale)) {
+                                        return ((List) faker.collection((List) generators)
+                                                .len(minLength, maxLength).build().get()).stream().toArray();
+                                    } else {
+                                        return faker.doWith(
+                                                () -> ((List) faker.collection((List) generators)
+                                                        .len(minLength, maxLength).build().get()).stream().toArray(),
+                                                fieldLocale
+                                        );
+                                    }
+                                }));
             case STRUCT:
                 List<Field> fields = new ArrayList<>();
                 List<Map<String, Object>> list = (List<Map<String, Object>>) object.get("fields");
-                for (Map<String, Object> elem: list) {
-                    fields.add(get(faker, elem));
+                for (Map<String, Object> elem : list) {
+                    fields.add(get(faker, elem, fieldLocale));
                 }
                 return (T) Field.compositeField(name, fields.toArray(new Field[0]));
             default:
@@ -87,36 +99,65 @@ public class FieldFactory {
         return nullRate;
     }
 
-    public List<Supplier<?>> getGenerators(Faker faker, List<String> list) {
+    private static Locale parseLocale(String fieldLocale, Locale defaultLocale) {
+        if (fieldLocale == null) return defaultLocale;
+        return Locale.forLanguageTag(fieldLocale);
+    }
+
+    public List<Supplier<?>> getGenerators(Faker faker, List<String> list, Locale fieldLocale, Locale defaultLocale) {
         if (list == null) return null;
         List<Supplier<?>> res = new ArrayList<>(list.size());
-        for (String s: list) {
+        for (String s : list) {
             String[] c = s.split("#");
             try {
                 if (c[0].indexOf('.') == -1 || c[0].contains("net.datafaker")) {
                     final Method m = faker.getClass().getMethod((
                             c[0].indexOf('.') == -1 ? c[0]
-                            : c[0].substring(c[0].lastIndexOf('.') + 1))
+                                    : c[0].substring(c[0].lastIndexOf('.') + 1))
                             .toLowerCase(Locale.ROOT));
-                    final Object o = m.invoke(faker);
-                    final Method method = o.getClass().getMethod(c[1]);
-                    res.add(() -> {
-                        try {
-                            return method.invoke(o);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                    if (fieldLocale.equals(defaultLocale)) {
+                        final Object o = m.invoke(faker);
+                        final Method method = o.getClass().getMethod(c[1]);
+                        res.add(() -> {
+                            try {
+                                return method.invoke(o);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    } else {
+                        res.add(() -> faker.doWith(() -> {
+                            try {
+                                final Object o = m.invoke(faker);
+                                final Method method = o.getClass().getMethod(c[1]);
+                                return method.invoke(o);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }, fieldLocale));
+                    }
                 } else {
-                    Object o = Class.forName(c[0]).newInstance();
-                    Method m = o.getClass().getMethod(c[1]);
-                    res.add(() -> {
-                        try {
-                            return m.invoke(o);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                    if (fieldLocale.equals(defaultLocale)) {
+                        Object o = Class.forName(c[0]).newInstance();
+                        Method m = o.getClass().getMethod(c[1]);
+                        res.add(() -> {
+                            try {
+                                return m.invoke(o);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    } else {
+                        res.add(() -> faker.doWith(() -> {
+                            try {
+                                Object o = Class.forName(c[0]).newInstance();
+                                Method m = o.getClass().getMethod(c[1]);
+                                return m.invoke(o);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }, fieldLocale));
+                    }
                 }
             } catch (ClassNotFoundException | NoSuchMethodException e) {
                 throw new RuntimeException("Issue for generator '" + s + "'", e);

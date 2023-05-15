@@ -46,7 +46,7 @@ public class DatafakerGen {
             fields = new ArrayList<>();
             for (Object o : list) {
                 final Map<String, Object> stringObjectMap = (Map<String, Object>) o;
-                final Field f = FieldFactory.getInstance().get(faker, stringObjectMap);
+                final Field f = FieldFactory.getInstance().get(faker, stringObjectMap, defaultLocale);
                 if (f != null) {
                     fields.add(f);
                 }
