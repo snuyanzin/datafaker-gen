@@ -24,7 +24,7 @@ public class JsonFormat implements Format<Object> {
                             ? JsonTransformer.JsonTransformerBuilder.FormattedAs.JSON_ARRAY
                             : JsonTransformer.JsonTransformerBuilder.FormattedAs.JSON_OBJECT);
                     break;
-                case "quote":
+                case "commabetweenobjects":
                     builder.withCommaBetweenObjects(Boolean.parseBoolean(entry.getValue()));
                     break;
             }
