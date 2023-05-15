@@ -63,9 +63,9 @@ public class DatafakerGen {
         ServiceLoader<Sink> sinks = ServiceLoader.load(Sink.class);
         Map<String, Sink> name2sink = new HashMap<>();
         for (Sink s : sinks) {
-            name2sink.put(s.getName(), s);
+            name2sink.put(s.getName().toLowerCase(Locale.ROOT), s);
         }
-        String sinkName = conf.getSink();
+        String sinkName = conf.getSink().toLowerCase(Locale.ROOT);
         Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
         name2sink.get(sinkName).run(sinkConf,
                 n -> findTransformerByName(conf.getFormat(), name2Transformer)
