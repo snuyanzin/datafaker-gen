@@ -1,7 +1,7 @@
 fields:
   - name: test
     nullRate: 0.1
-    generators: [ Name#lastName]
+    generators: [ net.datafaker.providers.base.Name#lastName ]
   - name: test
     nullable: true
     generators: [ Name#firstName ]
