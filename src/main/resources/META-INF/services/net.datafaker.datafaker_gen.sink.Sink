@@ -1,0 +1,2 @@
+net.datafaker.datafaker_gen.sink.CommandLineSink
+net.datafaker.datafaker_gen.sink.TextFileSink
