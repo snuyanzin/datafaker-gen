@@ -17,14 +17,14 @@ public enum FieldType {
     }
 
     public static FieldType validateRequiredFieldsAndGet(Map<String, Object> map) {
-        FieldType type = of((String) map.get("type"));
+        final FieldType type = of((String) map.get("type"));
         for (String field: type.requiredFields) {
             Objects.requireNonNull(map.get(field), field + " is required field for type '" + type + "'");
         }
         return type;
     }
 
-    public static FieldType of(String value) {
+    private static FieldType of(String value) {
         for (FieldType v: values()) {
             if (v.name.equals(value)) {
                 return v;

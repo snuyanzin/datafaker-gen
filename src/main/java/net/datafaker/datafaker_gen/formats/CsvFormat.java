@@ -14,7 +14,7 @@ public class CsvFormat implements Format<CharSequence> {
 
     @Override
     public <IN> CsvTransformer<IN> getTransformer(Map<String, String> config) {
-        CsvTransformer.CsvTransformerBuilder<Object> builder = CsvTransformer.builder();
+        final CsvTransformer.CsvTransformerBuilder<Object> builder = CsvTransformer.builder();
         if (config == null) {
             return (CsvTransformer<IN>) builder.build();
         }

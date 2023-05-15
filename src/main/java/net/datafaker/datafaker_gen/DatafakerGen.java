@@ -25,8 +25,8 @@ public class DatafakerGen {
 
     public static void main(String[] args) {
 
-        Faker faker = new Faker();
-        Configuration conf = parseArg(args);
+        final Faker faker = new Faker();
+        final Configuration conf = parseArg(args);
         final Map<String, Object> outputs;
         try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getOutputConf()), StandardCharsets.UTF_8)) {
             outputs = new Yaml().loadAs(br, Map.class);
@@ -35,15 +35,15 @@ public class DatafakerGen {
         }
         final Map<String, Object> formats = (Map<String, Object>) outputs.get("formats");
         final Map<String, Object> sinksFromConfig = (Map<String, Object>) outputs.get("sinks");
-        List<Field> fields;
+        final List<Field> fields;
         try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getSchema()), StandardCharsets.UTF_8)) {
             final Map<String, Object> valuesMap = new Yaml().loadAs(br, Map.class);
 
-            List<Object> list = (List<Object>) valuesMap.get("fields");
+            final List<Object> list = (List<Object>) valuesMap.get("fields");
             fields = new ArrayList<>();
             for (Object o : list) {
-                Map<String, Object> stringObjectMap = (Map<String, Object>) o;
-                Field f = FieldFactory.getInstance().get(faker, stringObjectMap);
+                final Map<String, Object> stringObjectMap = (Map<String, Object>) o;
+                final Field f = FieldFactory.getInstance().get(faker, stringObjectMap);
                 if (f != null) {
                     fields.add(f);
                 }
@@ -52,8 +52,8 @@ public class DatafakerGen {
             throw new RuntimeException(e);
         }
 
-        ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
-        Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
+        final ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
+        final Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
         for (Format<?> f : fs) {
             name2Transformer.put(
                     f.getName().toUpperCase(Locale.ROOT),
@@ -61,14 +61,14 @@ public class DatafakerGen {
             );
         }
 
-        ServiceLoader<Sink> sinks = ServiceLoader.load(Sink.class);
-        Map<String, Sink> name2sink = new HashMap<>();
+        final ServiceLoader<Sink> sinks = ServiceLoader.load(Sink.class);
+        final Map<String, Sink> name2sink = new HashMap<>();
         for (Sink s : sinks) {
             name2sink.put(s.getName().toLowerCase(Locale.ROOT), s);
         }
-        String sinkName = conf.getSink().toLowerCase(Locale.ROOT);
-        Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
-        Sink sink = name2sink.get(sinkName);
+        final String sinkName = conf.getSink().toLowerCase(Locale.ROOT);
+        final Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
+        final Sink sink = name2sink.get(sinkName);
         Objects.requireNonNull(sink,
                 "Sink '" + conf.getSink() + "' is not available. The list of available sinks: " + name2sink.keySet());
         final Schema schema = Schema.of(fields.toArray(new Field[0]));
@@ -114,7 +114,7 @@ public class DatafakerGen {
 
     private static Transformer<?, ?> findTransformerByName(String formatName,
                                                            Map<String, Transformer<?, ?>> format2Transformer) {
-        String formatNameUpper = formatName.toUpperCase(Locale.ROOT);
+        final String formatNameUpper = formatName.toUpperCase(Locale.ROOT);
         if (format2Transformer.containsKey(formatNameUpper)) {
             return format2Transformer.get(formatNameUpper);
         }

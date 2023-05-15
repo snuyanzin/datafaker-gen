@@ -13,7 +13,7 @@ public class SqlFormat implements Format<CharSequence> {
 
     @Override
     public <IN> SqlTransformer<IN> getTransformer(Map<String, String> config) {
-        SqlTransformer.SqlTransformerBuilder<Object> builder = SqlTransformer.builder();
+        final SqlTransformer.SqlTransformerBuilder<Object> builder = SqlTransformer.builder();
         if (config == null) {
             return (SqlTransformer<IN>) builder.build();
         }

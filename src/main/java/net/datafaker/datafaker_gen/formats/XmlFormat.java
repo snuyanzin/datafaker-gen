@@ -13,7 +13,7 @@ public class XmlFormat implements Format<CharSequence> {
 
     @Override
     public <IN> XmlTransformer<IN> getTransformer(Map<String, String> config) {
-        XmlTransformer.XmlTransformerBuilder<Object> builder = new XmlTransformer.XmlTransformerBuilder<>();
+        final XmlTransformer.XmlTransformerBuilder<Object> builder = new XmlTransformer.XmlTransformerBuilder<>();
         if (config == null) {
             return (XmlTransformer<IN>) builder.build();
         }

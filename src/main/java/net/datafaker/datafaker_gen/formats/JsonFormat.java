@@ -13,7 +13,7 @@ public class JsonFormat implements Format<Object> {
 
     @Override
     public <IN> JsonTransformer<IN> getTransformer(Map<String, String> config) {
-        JsonTransformer.JsonTransformerBuilder<Object> builder = JsonTransformer.builder();
+        final JsonTransformer.JsonTransformerBuilder<Object> builder = JsonTransformer.builder();
         if (config == null) {
             return (JsonTransformer<IN>) builder.build();
         }
