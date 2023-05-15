@@ -1,24 +1,24 @@
 fields:
   - name: test
     nullRate: 0.1
-    generators: [ net.datafaker.providers.base.Name#lastName]
+    generators: [ net.datafaker.providers.base.Name#lastName ]
   - name: test
     nullable: true
-    generators: [ net.datafaker.providers.base.Name#firstName ]
+    generators: [ Name#firstName ]
   - name: test"2
     type: array
     nullable: false
     minLength: 2
     maxLength: 5
-    generators: [net.datafaker.providers.base.Name#firstName, net.datafaker.providers.base.Name#lastName]
+    generators: [ Name#firstName, Name#lastName ]
   - name: test"6
     type: struct
     nullable: false
     fields:
       - name: test"4
         nullable: false
-        generators: [ net.datafaker.providers.base.Name#firstName, net.datafaker.providers.base.Name#lastName ]
+        generators: [ Name#firstName, Name#lastName ]
       - name: test"3
         nullable: false
-        generators: [ net.datafaker.providers.base.Name#firstName, net.datafaker.providers.base.Name#lastName ]
+        generators: [ Name#firstName, Name#lastName ]
 
