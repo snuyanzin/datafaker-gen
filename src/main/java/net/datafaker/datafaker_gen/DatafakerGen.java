@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -51,9 +52,12 @@ public class DatafakerGen {
         }
 
         ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
-        Map<String, Transformer<?, ?>> name2Format = new HashMap<>();
+        Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
         for (Format<?> f : fs) {
-            name2Format.put(f.getName(), f.getTransformer((Map<String, String>) formats.get(f.getName())));
+            name2Transformer.put(
+                    f.getName().toUpperCase(Locale.ROOT),
+                    f.getTransformer((Map<String, String>) formats.get(f.getName()))
+            );
         }
 
         ServiceLoader<Sink> sinks = ServiceLoader.load(Sink.class);
@@ -64,7 +68,7 @@ public class DatafakerGen {
         String sinkName = conf.getSink();
         Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
         name2sink.get(sinkName).run(sinkConf,
-                n -> name2Format.get(conf.getFormat())
+                n -> findTransformerByName(conf.getFormat(), name2Transformer)
                         .generate(Schema.of(fields.toArray(new Field[0])), n), conf.getNumberOfLines());
     }
 
@@ -101,5 +105,17 @@ public class DatafakerGen {
             }
         }
         return builder.build();
+    }
+
+    private static Transformer<?, ?> findTransformerByName(String formatName,
+                                                           Map<String, Transformer<?, ?>> format2Transformer) {
+        String formatNameUpper = formatName.toUpperCase(Locale.ROOT);
+        if (format2Transformer.containsKey(formatNameUpper)) {
+            return format2Transformer.get(formatNameUpper);
+        }
+
+        var errorMessage = "'" + formatName + "'" + " is not supported yet. Available formats: ["
+                + String.join(", ", format2Transformer.keySet()) + "]";
+        throw new IllegalArgumentException(errorMessage);
     }
 }
