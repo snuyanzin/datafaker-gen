@@ -12,3 +12,5 @@ formats:
   json:
     formattedAs: ""
   yaml:
+  xml:
+    pretty: true
