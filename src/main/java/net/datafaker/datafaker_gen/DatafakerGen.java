@@ -64,7 +64,8 @@ public class DatafakerGen {
         String sinkName = conf.getSink();
         Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
         name2sink.get(sinkName).run(sinkConf,
-                n -> name2Format.get(conf.getFormat()).generate(Schema.of(fields.toArray(new Field[0])), n), conf.getNumberOfLines());
+                n -> name2Format.get(conf.getFormat())
+                        .generate(Schema.of(fields.toArray(new Field[0])), n), conf.getNumberOfLines());
     }
 
 
@@ -73,7 +74,7 @@ public class DatafakerGen {
         if (args == null || args.length == 0) {
             return builder.build();
         }
-        for (int i = 0; i < args.length; i++) {
+        for (int i = 0; i < args.length - 1; i++) {
             switch (args[i]) {
                 case "-n":
                     builder.numberOfLines(Integer.parseInt(args[i + 1]));
