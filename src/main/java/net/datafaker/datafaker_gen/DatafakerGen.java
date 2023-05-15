@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ServiceLoader;
 
 public class DatafakerGen {
@@ -67,7 +68,10 @@ public class DatafakerGen {
         }
         String sinkName = conf.getSink().toLowerCase(Locale.ROOT);
         Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
-        name2sink.get(sinkName).run(sinkConf,
+        Sink sink = name2sink.get(sinkName);
+        Objects.requireNonNull(sink,
+                "Sink '" + conf.getSink() + "' is not available. The list of available sinks: " + name2sink.keySet());
+        sink.run(sinkConf,
                 n -> findTransformerByName(conf.getFormat(), name2Transformer)
                         .generate(Schema.of(fields.toArray(new Field[0])), n), conf.getNumberOfLines());
     }
