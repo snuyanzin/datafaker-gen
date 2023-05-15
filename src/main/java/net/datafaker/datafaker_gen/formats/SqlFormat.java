@@ -31,10 +31,19 @@ public class SqlFormat implements Format<CharSequence> {
                     builder.sqlQuoteIdentifier(entry.getValue());
                     break;
                 case "batch":
-                    if (entry.getValue() == null || entry.getValue().trim().isEmpty()) {
+                    Object batch = entry.getValue();
+                    if (batch instanceof Number) {
+                        int value = ((Number) batch).intValue();
+                        if (value > 0) {
+                            builder.batch(value);
+                        } else {
+                            builder.batch();
+                        }
+                    }
+                    if (batch == null || String.valueOf(batch).trim().isEmpty()) {
                         builder.batch();
                     } else {
-                        builder.batch(Integer.parseInt(entry.getValue()));
+                        builder.batch(Integer.parseInt(String.valueOf(batch)));
                     }
                     break;
             }
