@@ -25,7 +25,6 @@ public class DatafakerGen {
 
     public static void main(String[] args) {
 
-        final Faker faker = new Faker();
         final Configuration conf = parseArg(args);
         final Map<String, Object> outputs;
         try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getOutputConf()), StandardCharsets.UTF_8)) {
@@ -35,10 +34,14 @@ public class DatafakerGen {
         }
         final Map<String, Object> formats = (Map<String, Object>) outputs.get("formats");
         final Map<String, Object> sinksFromConfig = (Map<String, Object>) outputs.get("sinks");
+        final Locale defaultLocale;
         final List<Field> fields;
+        final Faker faker;
         try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getSchema()), StandardCharsets.UTF_8)) {
             final Map<String, Object> valuesMap = new Yaml().loadAs(br, Map.class);
-
+            defaultLocale = Locale.forLanguageTag(
+                    (String) Objects.requireNonNullElse(valuesMap.get("default_locale"), Locale.ENGLISH.toLanguageTag()));
+            faker = new Faker(defaultLocale);
             final List<Object> list = (List<Object>) valuesMap.get("fields");
             fields = new ArrayList<>();
             for (Object o : list) {
