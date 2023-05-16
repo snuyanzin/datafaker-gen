@@ -24,7 +24,6 @@ import java.util.ServiceLoader;
 public class DatafakerGen {
 
     public static void main(String[] args) {
-
         final Configuration conf = parseArg(args);
         final Map<String, Object> outputs;
         try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getOutputConf()), StandardCharsets.UTF_8)) {
