@@ -3,6 +3,7 @@ sinks:
     batchsize: 10000
     filepath: res
     mode: overwrite # errorifexists
+    create_parent_dirs: true
   cli:
     batchsize: 10000
 formats:

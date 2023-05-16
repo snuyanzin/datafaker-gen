@@ -17,12 +17,17 @@ public class TextFileSink implements Sink {
     }
 
     @Override
-    public void run(Map<String, String> config, Function<Integer, ?> function, int numberOfLines) {
-        String filepath = config.get("filepath");
-        String mode = config.get("mode");
+    public void run(Map<String, ?> config, Function<Integer, ?> function, int numberOfLines) {
+        String filepath = (String) config.get("filepath");
+        String mode = (String) config.get("mode");
+        boolean createParentDirs = (boolean) config.get("create_parent_dirs");
         Path path = Paths.get(filepath);
+
+        handlePathAndDirsTree(path, createParentDirs);
+
         switch (WriteMode.getWriteMode(mode)) {
-            case OVERWRITE: break;
+            case OVERWRITE:
+                break;
             case ERROR_IF_EXISTS:
                 if (Files.exists(path)) {
                     throw new RuntimeException("File '" + filepath + "' already exists. " +
@@ -30,8 +35,9 @@ public class TextFileSink implements Sink {
                 } else {
                     break;
                 }
-            case UNDEFINED: throw new RuntimeException("Undefined write mode: '" + mode + "'. " +
-                    "Possible modes: " + String.join(", ", WriteMode.getLegalValues()));
+            case UNDEFINED:
+                throw new RuntimeException("Undefined write mode: '" + mode + "'. " +
+                        "Possible modes: " + String.join(", ", WriteMode.getLegalValues()));
         }
 
         try (BufferedWriter bw = Files.newBufferedWriter(path)) {
@@ -45,5 +51,35 @@ public class TextFileSink implements Sink {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void handlePathAndDirsTree(Path path, boolean createParentDirs) {
+        if (Files.isDirectory(path)) {
+            throw new RuntimeException("'" + path + "' is a directory, " +
+                    "'filepath' config has to be a path to the file.");
+        }
+
+        if (isDirectoryTreeExists(path)) {
+            return;
+        }
+
+        if (!createParentDirs) {
+            throw new RuntimeException("'" + path.getParent() + "' directory doesn't exist. " +
+                    "Set 'create_parent_dirs' to 'true' to allow automatic file path creation.");
+        } else {
+            try {
+                Files.createDirectories(path.getParent());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private boolean isDirectoryTreeExists(Path path) {
+        if (path.getNameCount() == 1) {
+            return true;
+        }
+
+        return Files.exists(path.getParent());
     }
 }

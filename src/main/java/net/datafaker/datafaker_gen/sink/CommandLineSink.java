@@ -10,7 +10,7 @@ public class CommandLineSink implements Sink {
     }
 
     @Override
-    public void run(Map<String, String> config, Function<Integer, ?> function, int numberOfLines) {
+    public void run(Map<String, ?> config, Function<Integer, ?> function, int numberOfLines) {
         int numberOfLinesToPrint = numberOfLines;
         int batchSize = getBatchSize(config);
         while (numberOfLinesToPrint > 0) {

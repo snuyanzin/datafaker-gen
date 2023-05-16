@@ -22,7 +22,6 @@ import java.util.ServiceLoader;
 public class DatafakerGen {
 
     public static void main(String[] args) {
-
         Faker faker = new Faker();
         Configuration conf = parseArg(args);
         final Map<String, Object> outputs;
