@@ -2,6 +2,7 @@ package net.datafaker.datafaker_gen.formats;
 
 import net.datafaker.transformations.CsvTransformer;
 
+import java.util.Locale;
 import java.util.Map;
 
 public class CsvFormat implements Format<CharSequence> {
@@ -13,12 +14,12 @@ public class CsvFormat implements Format<CharSequence> {
 
     @Override
     public <IN> CsvTransformer<IN> getTransformer(Map<String, String> config) {
-        CsvTransformer.CsvTransformerBuilder<Object> builder = CsvTransformer.builder();
+        final CsvTransformer.CsvTransformerBuilder<Object> builder = CsvTransformer.builder();
         if (config == null) {
             return (CsvTransformer<IN>) builder.build();
         }
         for (Map.Entry<String, String> entry : config.entrySet()) {
-            switch (entry.getKey()) {
+            switch (entry.getKey().toLowerCase(Locale.ROOT)) {
                 case "header":
                     builder.header(Boolean.parseBoolean(entry.getValue()));
                     break;

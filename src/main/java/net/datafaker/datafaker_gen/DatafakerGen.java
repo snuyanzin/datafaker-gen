@@ -16,14 +16,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ServiceLoader;
 
 public class DatafakerGen {
 
     public static void main(String[] args) {
-        Faker faker = new Faker();
-        Configuration conf = parseArg(args);
+        final Configuration conf = parseArg(args);
         final Map<String, Object> outputs;
         try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getOutputConf()), StandardCharsets.UTF_8)) {
             outputs = new Yaml().loadAs(br, Map.class);
@@ -32,15 +33,19 @@ public class DatafakerGen {
         }
         final Map<String, Object> formats = (Map<String, Object>) outputs.get("formats");
         final Map<String, Object> sinksFromConfig = (Map<String, Object>) outputs.get("sinks");
-        List<Field> fields;
+        final Locale defaultLocale;
+        final List<Field> fields;
+        final Faker faker;
         try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getSchema()), StandardCharsets.UTF_8)) {
             final Map<String, Object> valuesMap = new Yaml().loadAs(br, Map.class);
-
-            List<Object> list = (List<Object>) valuesMap.get("fields");
+            defaultLocale = Locale.forLanguageTag(
+                    (String) Objects.requireNonNullElse(valuesMap.get("default_locale"), Locale.ENGLISH.toLanguageTag()));
+            faker = new Faker(defaultLocale);
+            final List<Object> list = (List<Object>) valuesMap.get("fields");
             fields = new ArrayList<>();
             for (Object o : list) {
-                Map<String, Object> stringObjectMap = (Map<String, Object>) o;
-                Field f = FieldFactory.getInstance().get(faker, stringObjectMap);
+                final Map<String, Object> stringObjectMap = (Map<String, Object>) o;
+                final Field f = FieldFactory.getInstance().get(faker, stringObjectMap, defaultLocale);
                 if (f != null) {
                     fields.add(f);
                 }
@@ -49,22 +54,29 @@ public class DatafakerGen {
             throw new RuntimeException(e);
         }
 
-        ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
-        Map<String, Transformer<?, ?>> name2Format = new HashMap<>();
+        final ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
+        final Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
         for (Format<?> f : fs) {
-            name2Format.put(f.getName(), f.getTransformer((Map<String, String>) formats.get(f.getName())));
+            name2Transformer.put(
+                    f.getName().toUpperCase(Locale.ROOT),
+                    f.getTransformer((Map<String, String>) formats.get(f.getName()))
+            );
         }
 
-        ServiceLoader<Sink> sinks = ServiceLoader.load(Sink.class);
-        Map<String, Sink> name2sink = new HashMap<>();
+        final ServiceLoader<Sink> sinks = ServiceLoader.load(Sink.class);
+        final Map<String, Sink> name2sink = new HashMap<>();
         for (Sink s : sinks) {
-            name2sink.put(s.getName(), s);
+            name2sink.put(s.getName().toLowerCase(Locale.ROOT), s);
         }
-        String sinkName = conf.getSink();
-        Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
-        name2sink.get(sinkName).run(sinkConf,
-                n -> name2Format.get(conf.getFormat())
-                        .generate(Schema.of(fields.toArray(new Field[0])), n), conf.getNumberOfLines());
+        final String sinkName = conf.getSink().toLowerCase(Locale.ROOT);
+        final Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
+        final Sink sink = name2sink.get(sinkName);
+        Objects.requireNonNull(sink,
+                "Sink '" + conf.getSink() + "' is not available. The list of available sinks: " + name2sink.keySet());
+        final Schema schema = Schema.of(fields.toArray(new Field[0]));
+        sink.run(sinkConf,
+                n -> findTransformerByName(conf.getFormat(), name2Transformer)
+                        .generate(schema, n), conf.getNumberOfLines());
     }
 
 
@@ -100,5 +112,17 @@ public class DatafakerGen {
             }
         }
         return builder.build();
+    }
+
+    private static Transformer<?, ?> findTransformerByName(String formatName,
+                                                           Map<String, Transformer<?, ?>> format2Transformer) {
+        final String formatNameUpper = formatName.toUpperCase(Locale.ROOT);
+        if (format2Transformer.containsKey(formatNameUpper)) {
+            return format2Transformer.get(formatNameUpper);
+        }
+
+        var errorMessage = "'" + formatName + "'" + " is not supported yet. Available formats: ["
+                + String.join(", ", format2Transformer.keySet()) + "]";
+        throw new IllegalArgumentException(errorMessage);
     }
 }

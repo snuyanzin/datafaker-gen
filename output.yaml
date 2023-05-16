@@ -12,3 +12,6 @@ formats:
     separator: $$$$$$$
   json:
     formattedAs: ""
+  yaml:
+  xml:
+    pretty: true

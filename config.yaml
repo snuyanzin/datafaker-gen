@@ -1,6 +1,8 @@
+default_locale: en-EN
 fields:
   - name: test
     nullRate: 0.1
+    locale: ru-RU
     generators: [ net.datafaker.providers.base.Name#lastName ]
   - name: test
     nullable: true
@@ -8,6 +10,7 @@ fields:
   - name: test"2
     type: array
     nullable: false
+    locale: ja-JP
     minLength: 2
     maxLength: 5
     generators: [ Name#firstName, Name#lastName ]

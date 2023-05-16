@@ -2,6 +2,7 @@ package net.datafaker.datafaker_gen.formats;
 
 import net.datafaker.transformations.sql.SqlTransformer;
 
+import java.util.Locale;
 import java.util.Map;
 
 public class SqlFormat implements Format<CharSequence> {
@@ -12,29 +13,38 @@ public class SqlFormat implements Format<CharSequence> {
 
     @Override
     public <IN> SqlTransformer<IN> getTransformer(Map<String, String> config) {
-        SqlTransformer.SqlTransformerBuilder<Object> builder = SqlTransformer.builder();
+        final SqlTransformer.SqlTransformerBuilder<Object> builder = SqlTransformer.builder();
         if (config == null) {
             return (SqlTransformer<IN>) builder.build();
         }
         for (Map.Entry<String, String> entry : config.entrySet()) {
-            switch (entry.getKey()) {
-                case "tableName":
+            switch (entry.getKey().toLowerCase(Locale.ROOT)) {
+                case "tablename":
                     builder.tableName(entry.getValue());
                     break;
                 case "quote":
                     builder.quote(entry.getValue().charAt(0));
                     break;
-                case "schemaName":
+                case "schemaname":
                     builder.schemaName(entry.getValue());
                     break;
-                case "sqlIdentifierQuote":
+                case "sqlidentifierquote":
                     builder.sqlQuoteIdentifier(entry.getValue());
                     break;
                 case "batch":
-                    if (entry.getValue() == null || entry.getValue().trim().isEmpty()) {
+                    Object batch = entry.getValue();
+                    if (batch instanceof Number) {
+                        int value = ((Number) batch).intValue();
+                        if (value > 0) {
+                            builder.batch(value);
+                        } else {
+                            builder.batch();
+                        }
+                    }
+                    if (batch == null || String.valueOf(batch).trim().isEmpty()) {
                         builder.batch();
                     } else {
-                        builder.batch(Integer.parseInt(entry.getValue()));
+                        builder.batch(Integer.parseInt(String.valueOf(batch)));
                     }
                     break;
             }
