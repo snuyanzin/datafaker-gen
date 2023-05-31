@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +26,13 @@ class CommandLineSinkTest {
     @AfterEach
     void tearDown() {
         System.setOut(originalOut);
+        if (outputStream != null) {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                throw new RuntimeException();
+            }
+        }
     }
 
     @Test
