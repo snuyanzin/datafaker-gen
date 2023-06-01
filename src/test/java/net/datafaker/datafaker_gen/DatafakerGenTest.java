@@ -4,10 +4,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -21,12 +21,13 @@ class DatafakerGenTest {
     void generateJsonWith10LineAndFileOutput(String input, int expectedLines) throws IOException {
         DatafakerGen.main(input.split("\\s+"));
 
-        File tempFile = new File("res");
-        List<String> lines = Files.readAllLines(Path.of(tempFile.getPath()));
+        String resultFileNameFromConfig = "res";
+        Path tempFile = Paths.get(resultFileNameFromConfig);
+        List<String> lines = Files.readAllLines(tempFile);
         assertThat(lines).hasSize(expectedLines);
 
         // Clean up
-        tempFile.delete();
+        Files.delete(tempFile);
     }
 
     @ParameterizedTest

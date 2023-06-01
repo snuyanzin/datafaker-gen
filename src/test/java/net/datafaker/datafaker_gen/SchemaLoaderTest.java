@@ -13,7 +13,7 @@ class SchemaLoaderTest {
 
     @Test
     void generateJsonWith10LineAndFileOutput() throws IOException {
-        String resourceName = "./schemas/config.yaml";
+        String resourceName = "./schemas/config_test.yaml";
         URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
 
         assert resourceUrl != null;
