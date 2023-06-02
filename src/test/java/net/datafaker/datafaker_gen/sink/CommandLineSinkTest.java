@@ -45,6 +45,6 @@ class CommandLineSinkTest {
                 .collect(Collectors.toList()),4);
 
         String printedOutput = outputStream.toString().trim();
-        assertEquals("[Line 0, Line 1]\n[Line 0, Line 1]", printedOutput);
+        assertEquals("[Line 0, Line 1]" + System.lineSeparator() + "[Line 0, Line 1]", printedOutput);
     }
 }
