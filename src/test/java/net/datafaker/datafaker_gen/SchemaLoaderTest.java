@@ -3,21 +3,21 @@ package net.datafaker.datafaker_gen;
 import net.datafaker.transformations.Field;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.URL;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SchemaLoaderTest {
 
     @Test
-    void generateJsonWith10LineAndFileOutput() throws IOException {
+    void loadSchemaFromConfigFile() throws URISyntaxException {
         String resourceName = "./schemas/config_test.yaml";
-        URL resourceUrl = getClass().getClassLoader().getResource(resourceName);
+        String path = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource(resourceName)).toURI()).toString();
 
-        assert resourceUrl != null;
-        Configuration configuration = DatafakerGen.parseArg(new String[]{"-f", "xml", "-n", "10", "-sink", "textfile", "-s", resourceUrl.getPath()});
+        Configuration configuration = DatafakerGen.parseArg(new String[]{"-f", "xml", "-n", "10", "-sink", "textfile", "-s", path});
         List<Field> fields = SchemaLoader.getFields(configuration);
 
         assertThat(fields).hasSize(1);
