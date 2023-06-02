@@ -32,27 +32,6 @@ public class DatafakerGen {
             throw new RuntimeException(e);
         }
         final Map<String, Object> formats = (Map<String, Object>) outputs.get("formats");
-        final Map<String, Object> sinksFromConfig = (Map<String, Object>) outputs.get("sinks");
-        final Locale defaultLocale;
-        final List<Field> fields;
-        final Faker faker;
-        try (BufferedReader br = Files.newBufferedReader(Paths.get(conf.getSchema()), StandardCharsets.UTF_8)) {
-            final Map<String, Object> valuesMap = new Yaml().loadAs(br, Map.class);
-            defaultLocale = Locale.forLanguageTag(
-                    (String) Objects.requireNonNullElse(valuesMap.get("default_locale"), Locale.ENGLISH.toLanguageTag()));
-            faker = new Faker(defaultLocale);
-            final List<Object> list = (List<Object>) valuesMap.get("fields");
-            fields = new ArrayList<>();
-            for (Object o : list) {
-                final Map<String, Object> stringObjectMap = (Map<String, Object>) o;
-                final Field f = FieldFactory.getInstance().get(faker, stringObjectMap, defaultLocale);
-                if (f != null) {
-                    fields.add(f);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
         final ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
         final Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
@@ -69,10 +48,13 @@ public class DatafakerGen {
             name2sink.put(s.getName().toLowerCase(Locale.ROOT), s);
         }
         final String sinkName = conf.getSink().toLowerCase(Locale.ROOT);
+        final Map<String, Object> sinksFromConfig = (Map<String, Object>) outputs.get("sinks");
         final Map<String, String> sinkConf = (Map<String, String>) sinksFromConfig.get(sinkName);
         final Sink sink = name2sink.get(sinkName);
         Objects.requireNonNull(sink,
                 "Sink '" + conf.getSink() + "' is not available. The list of available sinks: " + name2sink.keySet());
+
+        final List<Field> fields = SchemaLoader.getFields(conf);
         final Schema schema = Schema.of(fields.toArray(new Field[0]));
         sink.run(sinkConf,
                 n -> findTransformerByName(conf.getFormat(), name2Transformer)
