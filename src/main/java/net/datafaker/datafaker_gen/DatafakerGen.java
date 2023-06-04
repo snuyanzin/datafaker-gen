@@ -33,7 +33,6 @@ public class DatafakerGen {
         final Map<String, Object> formats = (Map<String, Object>) outputs.get("formats");
 
         final ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
-        //final Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
         final Map<String, Format> name2Format = new HashMap<>();
         for (Format<?> f : fs) {
             name2Format.put(
@@ -55,7 +54,7 @@ public class DatafakerGen {
         final List<Field> fields = SchemaLoader.getFields(conf);
         final Schema schema = Schema.of(fields.toArray(new Field[0]));
         sink.run(sinkConf,
-                n -> findAndValidateTransformerByName(conf.getFormat(), name2Format, outputs, schema)
+                n -> findAndValidateTransformerByName(conf.getFormat(), name2Format, formats, schema)
                         .generate(schema, n), conf.getNumberOfLines());
     }
 
