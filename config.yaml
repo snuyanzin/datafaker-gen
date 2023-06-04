@@ -1,27 +1,22 @@
 default_locale: en-EN
 fields:
-  - name: test
+  - name: lastname
     nullRate: 0.1
-    locale: ru-RU
-    generators: [ net.datafaker.providers.base.Name#lastName ]
-  - name: test
-    nullable: true
-    generators: [ Name#firstName ]
-  - name: test"2
-    type: array
-    nullable: false
+    generators: [ Name#lastName ]
+  - name: firstname
     locale: ja-JP
+    generators: [ Name#firstName ]
+  - name: phone numbers
+    type: array
     minLength: 2
     maxLength: 5
-    generators: [ Name#firstName, Name#lastName ]
-  - name: test"6
+    generators: [ PhoneNumber#phoneNumber, PhoneNumber#cellPhone ]
+  - name: address
     type: struct
-    nullable: false
     fields:
-      - name: test"4
-        nullable: false
-        generators: [ Name#firstName, Name#lastName ]
-      - name: test"3
-        nullable: false
-        generators: [ Name#firstName, Name#lastName ]
-
+      - name: country
+        generators: [ Address#country ]
+      - name: city
+        generators: [ Address#city ]
+      - name: street address
+        generators: [ Address#streetAddress ]

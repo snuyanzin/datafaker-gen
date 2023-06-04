@@ -11,7 +11,7 @@ formats:
     quote: "@"
     separator: $$$$$$$
   json:
-    formattedAs: ""
+    formattedAs: "[]"
   yaml:
   xml:
     pretty: true
