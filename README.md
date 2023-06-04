@@ -77,7 +77,7 @@ fields:
     nullRate: 0.1
     generators: [ Name#lastName ]
   - name: firstname
-    locale: jp-JP
+    locale: ja-JP
     generators: [ Name#firstName ]
 ```
 e.g.
