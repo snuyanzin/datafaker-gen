@@ -33,12 +33,11 @@ public class DatafakerGen {
         final Map<String, Object> formats = (Map<String, Object>) outputs.get("formats");
 
         final ServiceLoader<Format> fs = ServiceLoader.load(Format.class);
-        final Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
+        //final Map<String, Transformer<?, ?>> name2Transformer = new HashMap<>();
+        final Map<String, Format> name2Format = new HashMap<>();
         for (Format<?> f : fs) {
-            name2Transformer.put(
-                    f.getName().toUpperCase(Locale.ROOT),
-                    f.getTransformer((Map<String, String>) formats.get(f.getName()))
-            );
+            name2Format.put(
+                    f.getName().toUpperCase(Locale.ROOT), f);
         }
 
         final ServiceLoader<Sink> sinks = ServiceLoader.load(Sink.class);
@@ -56,7 +55,7 @@ public class DatafakerGen {
         final List<Field> fields = SchemaLoader.getFields(conf);
         final Schema schema = Schema.of(fields.toArray(new Field[0]));
         sink.run(sinkConf,
-                n -> findTransformerByName(conf.getFormat(), name2Transformer)
+                n -> findAndValidateTransformerByName(conf.getFormat(), name2Format, outputs, schema)
                         .generate(schema, n), conf.getNumberOfLines());
     }
 
@@ -135,15 +134,18 @@ public class DatafakerGen {
         System.out.println("-sink\t\tOutput to use");
     }
 
-    private static Transformer<?, ?> findTransformerByName(String formatName,
-                                                           Map<String, Transformer<?, ?>> format2Transformer) {
+    private static Transformer<?, ?> findAndValidateTransformerByName(String formatName,
+                                                                      Map<String, Format> name2Format,
+                                                                      final Map<String, Object> formatConf, Schema schema) {
         final String formatNameUpper = formatName.toUpperCase(Locale.ROOT);
-        if (format2Transformer.containsKey(formatNameUpper)) {
-            return format2Transformer.get(formatNameUpper);
+        final Format format = name2Format.get(formatNameUpper);
+        if (format != null) {
+            format.validateSchema(schema);
+            return format.getTransformer((Map<String, String>) formatConf.get(format.getName()));
         }
 
         var errorMessage = "'" + formatName + "'" + " is not supported yet. Available formats: ["
-                + String.join(", ", format2Transformer.keySet()) + "]";
+                + String.join(", ", name2Format.keySet()) + "]";
         throw new IllegalArgumentException(errorMessage);
     }
 }

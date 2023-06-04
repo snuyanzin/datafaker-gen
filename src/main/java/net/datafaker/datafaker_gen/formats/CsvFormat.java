@@ -1,6 +1,9 @@
 package net.datafaker.datafaker_gen.formats;
 
+import net.datafaker.transformations.CompositeField;
 import net.datafaker.transformations.CsvTransformer;
+import net.datafaker.transformations.Field;
+import net.datafaker.transformations.Schema;
 
 import java.util.Locale;
 import java.util.Map;
@@ -32,5 +35,14 @@ public class CsvFormat implements Format<CharSequence> {
             }
         }
         return (CsvTransformer<IN>) builder.build();
+    }
+
+    @Override
+    public void validateSchema(Schema schema) {
+        for (Field f: schema.getFields()) {
+            if (f instanceof CompositeField) {
+                throw new IllegalArgumentException("CSV does not support complex fields");
+            }
+        }
     }
 }
