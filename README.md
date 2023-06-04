@@ -12,23 +12,15 @@ you can get by
 
 ## An example of usage
 ```bash
-bin/datafaker_gen -f json -n 10 -sink cli
+bin/datafaker_gen -f json -n 2 -sink cli
 ```
 which will generate 10 random records in json format and output it to the terminal.
 like 
 ```
-{
-{"test": "Михеев", "test": "Edyth", "test\"2": ["北村", "藤野", "川田", "英樹"], "test\"6": {"test\"4": "Edison", "test\"3": "Lino"}},
-{"test": "Никитина", "test": "Gordon", "test\"2": ["陽子", "幸子", "日野"], "test\"6": {"test\"4": "Rolf", "test\"3": "Gene"}},
-{"test": "Михеева", "test": "Joel", "test\"2": ["洋平", "康平", "海斗", "坂口", "陸"], "test\"6": {"test\"4": "Nathaniel", "test\"3": "Zita"}},
-{"test": "Русакова", "test": "Deandre", "test\"2": ["谷本", "石黒", "今井", "正二"], "test\"6": {"test\"4": "Maximina", "test\"3": "Eleni"}},
-{"test": "Беляев", "test": "Dusty", "test\"2": ["裕子", "片山", "海翔"], "test\"6": {"test\"4": "Lincoln", "test\"3": "Leonel"}},
-{"test": "Алексеева", "test": "Casey", "test\"2": ["陽菜", "光"], "test\"6": {"test\"4": "Felton", "test\"3": "Fonda"}},
-{"test": null, "test": "Derick", "test\"2": ["竹下", "柴田", "悠人"], "test\"6": {"test\"4": "Maurice", "test\"3": "Kevin"}},
-{"test": "Горбунов", "test": "Jason", "test\"2": ["美結", "窪田", "永井"], "test\"6": {"test\"4": "Leo", "test\"3": "Eugene"}},
-{"test": null, "test": "Wilbert", "test\"2": ["翔平", "福井"], "test\"6": {"test\"4": "Britany", "test\"3": "Tyree"}},
-{"test": "Шилов", "test": "Danny", "test\"2": ["昭一", "碧", "桑原"], "test\"6": {"test\"4": "Benedict", "test\"3": "Clinton"}}
-}
+[
+{"lastname": "Howell", "firstname": "麻美", "phone numbers": ["(979) 786-5201", "(708) 707-4500"], "address": {"country": "Cote d'Ivoire", "city": "East Albertoburgh", "street address": "1734 Botsford Drives"}},
+{"lastname": null, "firstname": "蒼空", "phone numbers": ["(513) 352-0492", "(928) 813-7762", "(419) 616-6421"], "address": {"country": "Belgium", "city": "South Willis", "street address": "100 Dulce Turnpike"}}
+]
 ```
 
 It supports several formats: `csv`, `xml`, `json`, `sql` (also some dialects), `xml`, `yaml`.
