@@ -1,6 +1,5 @@
 package net.datafaker.datafaker_gen;
 
-import net.datafaker.Faker;
 import net.datafaker.datafaker_gen.formats.Format;
 import net.datafaker.datafaker_gen.sink.Sink;
 import net.datafaker.shaded.snakeyaml.Yaml;
@@ -13,13 +12,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
+import java.util.concurrent.Callable;
 
 public class DatafakerGen {
 
@@ -62,38 +61,78 @@ public class DatafakerGen {
     }
 
 
+    @FunctionalInterface
+    private static interface TriConsumer<A, B, C> {
+        void accept(A a, B b, C c);
+
+    }
+    private static final TriConsumer<Boolean, Callable<?>, String> CONSUMER4ARG_PARSE = (aBoolean, callable, s) -> {
+        if (aBoolean) {
+            try {
+                callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            System.err.println(s);
+            System.exit(1);
+        }
+    };
+
     public static Configuration parseArg(String[] args) {
         final Configuration.ConfigurationBuilder builder = Configuration.builder();
         if (args == null || args.length == 0) {
             return builder.build();
         }
-        for (int i = 0; i < args.length - 1; i++) {
+        for (int i = 0; i < args.length; i++) {
+            final int nextI = i + 1;
             switch (args[i]) {
                 case "-n":
-                    builder.numberOfLines(Integer.parseInt(args[i + 1]));
+                    CONSUMER4ARG_PARSE.accept(i < args.length - 1,
+                            () -> builder.numberOfLines(Integer.parseInt(args[nextI])), "Number of lines missed");
                     i++;
                     break;
                 case "-s":
-                    builder.schema(args[i + 1]);
+                    CONSUMER4ARG_PARSE.accept(i < args.length - 1,
+                            () -> builder.schema(args[nextI]), "Schema file missed");
                     i++;
                     break;
                 case "-f":
-                    builder.format(args[i + 1]);
+                    CONSUMER4ARG_PARSE.accept(i < args.length - 1,
+                            () -> builder.format(args[nextI]), "Format is missed");
                     i++;
                     break;
                 case "-oc":
-                    builder.outputConf(args[i + 1]);
+                    CONSUMER4ARG_PARSE.accept(i < args.length - 1,
+                            () -> builder.outputConf(args[nextI]), "Config for output is missed");
                     i++;
                     break;
                 case "-sink":
-                    builder.sink(args[i + 1]);
+                    CONSUMER4ARG_PARSE.accept(i < args.length - 1,
+                            () -> builder.sink(args[nextI]), "Sink is missed");
                     i++;
                     break;
+                case "--help":
+                case "-h":
+                    showHelp();
+                    System.exit(0);
                 default:
                     System.err.println("Unknown arg '" + args[i] + "'");
+                    System.out.println();
+                    showHelp();
+                    System.exit(1);
             }
         }
         return builder.build();
+    }
+
+    private static void showHelp() {
+        System.out.println("Help:");
+        System.out.println("-f\t\tFormat to use while output");
+        System.out.println("-oc\t\tConfig file for output to use");
+        System.out.println("-n\t\tNumber of records to generate");
+        System.out.println("-s\t\tSchema file to use");
+        System.out.println("-sink\t\tOutput to use");
     }
 
     private static Transformer<?, ?> findTransformerByName(String formatName,
