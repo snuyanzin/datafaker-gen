@@ -14,7 +14,7 @@ you can get by
 ```bash
 bin/datafaker_gen -f json -n 2 -sink cli
 ```
-which will generate 10 random records in json format and output it to the terminal.
+which will generate 2 random records in json format and output it to the terminal.
 like 
 ```json
 [
