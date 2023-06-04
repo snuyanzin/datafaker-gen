@@ -6,6 +6,8 @@ import net.datafaker.transformations.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,6 +16,8 @@ import java.util.function.Supplier;
 import static net.datafaker.transformations.Field.field;
 
 public class FieldFactory {
+
+    private static final Map<Class, Map<String, Method>> CLASS2NAME2METHOD = new IdentityHashMap<>();
 
     private FieldFactory() {
     }
@@ -104,6 +108,26 @@ public class FieldFactory {
         return Locale.forLanguageTag(fieldLocale);
     }
 
+    private Method getMethod(Class clazz, String name) {
+        Map<String, Method> name2method = CLASS2NAME2METHOD.get(clazz);
+        if (name2method == null) {
+            final Map<String, Method> map = new HashMap<>();
+            for (Method m: clazz.getMethods()) {
+                if (m.getParameterCount() == 0) {
+                    map.put(m.getName().toLowerCase(Locale.ROOT), m);
+                }
+            }
+            CLASS2NAME2METHOD.put(clazz, map);
+            name2method = map;
+        }
+        final String loweredName = name.toLowerCase(Locale.ROOT);
+        final Method method = name2method.get(loweredName);
+        if (method == null) {
+            throw new RuntimeException("Unknown call to " + clazz + "#" + name);
+        }
+        return method;
+    }
+
     public List<Supplier<?>> getGenerators(Faker faker, List<String> list, Locale fieldLocale, Locale defaultLocale) {
         if (list == null) return null;
         List<Supplier<?>> res = new ArrayList<>(list.size());
@@ -111,10 +135,10 @@ public class FieldFactory {
             String[] c = s.split("#");
             try {
                 if (c[0].indexOf('.') == -1 || c[0].contains("net.datafaker")) {
-                    final Method m = faker.getClass().getMethod((
+                    final Method m = getMethod(faker.getClass(), (
                             c[0].indexOf('.') == -1 ? c[0]
-                                    : c[0].substring(c[0].lastIndexOf('.') + 1))
-                            .toLowerCase(Locale.ROOT));
+                                    : c[0].substring(c[0].lastIndexOf('.') + 1)));
+
                     if (fieldLocale.equals(defaultLocale)) {
                         final Object o = m.invoke(faker);
                         final Method method = o.getClass().getMethod(c[1]);
