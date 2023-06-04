@@ -16,7 +16,7 @@ bin/datafaker_gen -f json -n 2 -sink cli
 ```
 which will generate 10 random records in json format and output it to the terminal.
 like 
-```
+```json
 [
 {"lastname": "Howell", "firstname": "麻美", "phone numbers": ["(979) 786-5201", "(708) 707-4500"], "address": {"country": "Cote d'Ivoire", "city": "East Albertoburgh", "street address": "1734 Botsford Drives"}},
 {"lastname": null, "firstname": "蒼空", "phone numbers": ["(513) 352-0492", "(928) 813-7762", "(419) 616-6421"], "address": {"country": "Belgium", "city": "South Willis", "street address": "100 Dulce Turnpike"}}
